@@ -8,14 +8,12 @@ import cookieParser from 'cookie-parser';
 const verifyToken = require('./auth/auth.middleware');
 
 
-const corsOptions={
-    origin: process.env.CLIENT_PORT
-}
 
 
 const app = express();
 
-app.use(cors());
+const clien_url = `http://localhost:${process.env.CLIENT_PORT}`;
+
 app.use(express.json());
 // app.use(bodyParser.json());
 app.use(express.urlencoded({extended:true}));
@@ -24,13 +22,14 @@ app.use(cookieParser());
 
 
 
-app.use(function (req:Request, res:Response, next:NextFunction) {
-    res.header(
-        "Access-Control-Allow-Headers",
-        "x-access-token, Origin, Content-Type, Accept"
-      );;
-    next();
-})
+app.use(cors({
+    origin:clien_url,
+    methods:["GET","POST","PUT","DELETE","PATCH"],
+    allowedHeaders:['X-Access-Token', 'Content-Type', 'Authorization']
+}));
+
+
+
 
 app.get('/posts',verifyToken,(req,res)=>{
     res.status(200).send(res.locals.user)
@@ -50,6 +49,6 @@ require('./routes/groups/groups.routes')(app);
 
 
 
-app.listen(process.env.CLIENT_PORT || 8082, ()=>{
+app.listen(process.env.BACKEND_PORT || 8082, ()=>{
     console.log("Kravin' app started");
 })

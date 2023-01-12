@@ -8,7 +8,7 @@ module.exports = function(app:any) {
   app.use(function(req:Request, res:Response, next:NextFunction) {
     res.header(
       "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
+      "X-Access-Token, Origin, Content-Type, Accept"
     );
     res.header(
       "Content-Type",

@@ -6,7 +6,7 @@ interface usertype {
     email: string;
     password: string;
     token:string | null;
-    verificationquestion:string;
+    verificationquestion:{question:string,answer:string};
   }
 
 const signupSchema = new Schema<usertype>({
@@ -26,7 +26,8 @@ const signupSchema = new Schema<usertype>({
         type:String
     },
     verificationquestion:{
-        type:String
+        type:Object,
+        required:true
     },
 },
 {timestamps:true}

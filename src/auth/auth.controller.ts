@@ -13,7 +13,7 @@ interface usertype {
   email: string;
   password: string;
   token?: string | null;
-  verificationquestion?: string;
+  verificationquestion?: {question:string, answer:string};
 }
 
 interface usersignintype {
@@ -21,7 +21,7 @@ interface usersignintype {
   email: string;
   password: string;
   token?: string | null;
-  verificationquestion?: string;
+  verificationquestion?: {question:string, answer:string};
 }
 
 interface userprofile{
@@ -144,7 +144,7 @@ const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
 };
 
 const requestPasswordUpdate = async (
-  req: TypedRequestBody<{ email: string; verificationquestion: string }>,
+  req: TypedRequestBody<{ email: string; verificationquestion: {question:string, answer:string} }>,
   res: Response,
   next: NextFunction
 ) => {
@@ -154,6 +154,8 @@ const requestPasswordUpdate = async (
     return res.status(400).send("Please fill all the inputs first");
   }
   
+
+  ///remember to give question to user first in order to get answer
   
   const user: usersignintype | null = await User.findOne({ email });
 
@@ -163,7 +165,7 @@ const requestPasswordUpdate = async (
 
   try {
 
-    if (user && verificationquestion === user.verificationquestion) {
+    if (user && verificationquestion.answer=== user.verificationquestion?.answer) {
       const forgotpasstoken = await jwt.sign({ email }, forgot_password_token_key, {
         expiresIn: "120s",
       });
