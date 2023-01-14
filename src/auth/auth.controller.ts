@@ -73,7 +73,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
 
     ///if username and email alreayd exists in db then sending appropriate feedback
     if (oldUsermail || oldUserusername) {
-      return res.status(409).send("User already exists!");
+      return res.status(409).json({message:"User already exists!"});
     }
 
     // encrypt password
@@ -128,7 +128,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
 
 
   } catch (err) {
-    return res.status(400).send({message:'There has been a problem creating your account!'});
+    return res.status(400).send({message:'There has been a problem creating your account, try again!'});
   }
 };
 
