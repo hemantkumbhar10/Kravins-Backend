@@ -1,10 +1,11 @@
 import express, { NextFunction, Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import User from "../models/Signup.schema";
 import UserProfile from "../models/Userprofile.schema";
 import { ObjectId } from "mongoose";
+const checkJWTExpiry = require('./auth.middleware');
 
 
 interface usertype {
@@ -98,15 +99,36 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     token = jwt.sign({ user_id: user._id, email }, tokenkey, {
       expiresIn: "2d",
     });
-
+    const decoded= jwt.verify(token, tokenkey) as {exp:number}
     user.token = token;
+    const expiresAt = decoded.exp;
     //return created user
-    const maxAge = 2 * 24 * 60 * 60;
-    const userdata=[user,userprofile];
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).send(JSON.stringify(userdata));
+
+
+    const userInfo = Object.assign({}, {username, email});
+
+    const userdata={
+      userInfo,
+      token,
+      expiresAt
+    };
+
+
+    res.cookie("jwt", token, { httpOnly: true });
+
+    res.status(200).send(
+      {
+        message:'New user created!',
+        userInfo,
+        token,
+        expiresAt,
+      }
+    );
+
+
+
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(400).send({message:'There has been a problem creating your account!'});
   }
 };
 
