@@ -19,7 +19,7 @@ const userSchema = new Schema<userprofile>({
     },
     fullname:{
         type:String,
-        required:true,
+        default:"",
     },
     birthdate:{
         type:Date,
@@ -27,7 +27,7 @@ const userSchema = new Schema<userprofile>({
     },
     profilepic:{
         type:String,
-        required:true,
+        default:""
     },
 },{timestamps:true});
 

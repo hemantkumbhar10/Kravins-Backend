@@ -28,7 +28,7 @@ interface usersignintype {
 interface userprofile{
   userid:ObjectId,
   fullname: string,
-  birthdate: Date | undefined,
+  birthdate?: Date | undefined,
   profilepic:string
 
 }
@@ -49,24 +49,24 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
 
     //if data is null, sending appropriate feedback
     if (!(username && email && password && verificationquestion)) {
-      return res.status(400).send("Please fill out all inputs!");
+      return res.status(400).json({message:"Please fill out all inputs!"});
+    }
+   
+    if(username.trim().length > 15){
+      return res.status(400).json({message:'Username is too big!'});
     }
 
   const mailFormat:RegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   const passwordFormat:RegExp = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}$/;  
-  
-
   const isEmailValid = email.match(mailFormat);
-  // console.log(isEmailValid);
   const isPasswordValid = password.match(passwordFormat);
 
   if(!isEmailValid){
-    return res.status(400).send('Please enter valid email address!');
+    return res.status(400).json({message:'Please enter valid email address!'});
   }
   if(!isPasswordValid){
-    return res.status(400).send('Password must include 7 to 15 characters which contain at least one numeric digit and a special character')
+    return res.status(400).json({message:'Password must include 7 to 15 characters which contain at least one numeric digit and a special character'})
   }
-
 
     const oldUsermail: string | null = await User.findOne({ email });
     const oldUserusername: string | null = await User.findOne({ username });
@@ -87,11 +87,20 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
       verificationquestion: verificationquestion,
     });
 
-    const userprofile: userprofile = await UserProfile.create({
+    // const userprofile: userprofile = await UserProfile.create({
+    //   userid: user._id,
+    //   fullname: "",
+    //   profilepic:"",
+    // });
+
+    const userprofile = new UserProfile<userprofile>({
       userid: user._id,
-      fullname: 'Jhon Doe',
-      profilepic:'this is my image',
+      fullname: "",
+      profilepic: "",
     });
+    await userprofile.save();
+
+    const profilepic = userprofile.profilepic;
 
     // console.log(UserProfile);
 
@@ -105,14 +114,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     //return created user
 
 
-    const userInfo = Object.assign({}, {username, email});
-
-    const userdata={
-      userInfo,
-      token,
-      expiresAt
-    };
-
+    const userInfo = Object.assign({}, {username, email,profilepic});
 
     res.cookie("jwt", token, { httpOnly: true });
 
@@ -128,40 +130,67 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
 
 
   } catch (err) {
-    return res.status(400).send({message:'There has been a problem creating your account, try again!'});
+
+    return res.status(400).json({message:'There has been a problem creating your account, try again!'});
   }
 };
 
 const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
+
   let token: string;
   try {
-    const { email, password } = req.body;
-    if (!(email && password)) {
-      return res.status(400).send("Please fill out all inputs!");
+    const emailid= req.body.email;
+    const passwordid = req.body.password;
+    if (!(emailid && passwordid)) {
+      return res.status(400).json({message:"Please fill all empty inputs!"});
     }
 
-    const isUser: usersignintype | null = await User.findOne({ email });
+    const isUser: usertype | null = await User.findOne({ emailid });
 
     if(!isUser){
-      return res.status(401).send('User does not exists! Please create account')
+      return res.status(401).json({message:'User does not exists! Please create account'})
     }
 
-    if (isUser && (await bcrypt.compare(password, isUser?.password))) {
-      token = await jwt.sign({ user_id: isUser._id, email }, tokenkey, {
-        expiresIn: "10h",
-      });
+    const userprofile: userprofile | null = await UserProfile.findOne({ userid: isUser._id });
 
+    const profilepic = userprofile ?  userprofile.profilepic : '';
+
+
+    const passwordValid = await bcrypt.compare(passwordid, isUser?.password);
+
+    if(!passwordValid){
+      return res.status(403).json({message:'Invalid Credentials'});
+    }
+
+
+      token = jwt.sign({ user_id: isUser._id, emailid }, tokenkey, {
+        expiresIn: "2d",
+      })
+  
+    const decoded = jwt.verify(token, tokenkey) as {exp:number};
+   
+      const {username, email,} = isUser;
       isUser.token = token;
-      const maxAge = 2 * 24 * 60 * 60;
-      return res
-        .status(200)
-        .cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
-        .send(isUser);
-      // return res.status(200).setHeader("Authorization", 'Bearer ' +token).send(isUser);
+  
+      const expiresAt = decoded.exp;
+
+      const userInfo = Object.assign({}, {username, email,profilepic});
+
+
+      res.cookie("jwt", token, {httpOnly:true});
+
+      res.status(200).send(
+        {
+          message:'Login Successful!',
+          userInfo,
+          token,
+          expiresAt,
+        }
+      )
     }
-    return res.status(400).send("Invalid Credentials");
-  } catch (err) {
-    return res.status(500).send(err);
+     catch (err) {
+
+    return res.status(500).send({message: "Somethings wrong, please try again!"});
   }
 };
 
