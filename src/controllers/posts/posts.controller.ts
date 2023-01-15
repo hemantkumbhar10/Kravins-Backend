@@ -180,7 +180,19 @@ const deletePost = async(req:TypedPostsBody<{postid:mongoose.Schema.Types.Object
   }
 
 }
+const dummyPost = async(req:TypedPostsBody<{postid:mongoose.Schema.Types.ObjectId}>, res:Response)=>{
+
+  try {
+    return res.status(200).send("This is Protected route");
+
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+
+}
 
 
 
-export default { createPost, getUsersAllPosts,updateUserPost,deletePost};
+
+
+export default { createPost, getUsersAllPosts,updateUserPost,deletePost,dummyPost};

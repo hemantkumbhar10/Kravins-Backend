@@ -20,5 +20,6 @@ module.exports = function(app:any) {
   app.get('/mypost', verifyToken, postsController.getUsersAllPosts);
   app.put('/mypost', verifyToken, postsController.updateUserPost);
   app.delete('/mypost', verifyToken, postsController.deletePost);
+  app.get('/dummy', verifyToken, postsController.dummyPost);
 
 };

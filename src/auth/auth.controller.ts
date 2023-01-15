@@ -285,14 +285,15 @@ const forgotpassword = async (
   }
 };
 
-const signout = (req: Request, res: Response, next: NextFunction) => {
+const signout = async(req: Request, res: Response, next: NextFunction) => {
   try {
     return res
       .status(200)
-      .clearCookie("jwt", { httpOnly: true })
-      .send("You have successfully logged out");
+      .clearCookie("jwt", {httpOnly:true})
+      .json({message:"You have successfully logged out"});
   } catch (err) {
-    return res.status(500).send(err);
+    console.log(err)
+    return res.status(500).json({messsage:"Something went wrong!, Please try again!"});
   }
 };
 
