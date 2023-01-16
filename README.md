@@ -4,7 +4,7 @@
 
 ***SIGNUP DATA***
 **/USER 1/**
-
+//////////////////////////
 username = benten
 email = jhon@email.com
 fullname = Jhon Doe
@@ -17,7 +17,7 @@ verificationQuestion =
 
 
 **/USER 2/**
-
+/////////////////////////////
 username = rickz
 email = rick@email.com
 fullname = Rick Sanchez
@@ -29,12 +29,13 @@ verificationQuestion =
 
 
 **/USER 3/**
-
+//////////////////////////////
 username = mortalmorty
 email = smith.morty@email.com
 fullname = Mortimier Smith
 birthday = 28/02/2002
 password = Jessica@123
+
 verificationQuestion =
                 where were you when you had your first kiss
                 in my dream, on bed
@@ -55,7 +56,7 @@ verificationQuestion =
 
 
 **/USER 5/**
-
+///////////////////////////////
 username = foodiegirl
 email = dikshasare@email.com
 fullname = Diksha Sare

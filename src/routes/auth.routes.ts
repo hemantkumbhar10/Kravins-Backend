@@ -25,7 +25,7 @@ module.exports = function(app:any) {
 
   app.post('/login', auth.signin);
   
-  app.post('/logout',verifyToken, auth.signout);
+  app.post('*logout',verifyToken, auth.signout);
   app.post('/requestpasswordreset', auth.requestPasswordUpdate);
   app.put('/resetpassword', auth.forgotpassword);
 };

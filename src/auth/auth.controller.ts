@@ -46,11 +46,16 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
   try {
     //fetching user data from body
     const { username, email, password, verificationquestion } = req.body;
+  
 
     //if data is null, sending appropriate feedback
     if (!(username && email && password && verificationquestion)) {
       return res.status(400).json({message:"Please fill out all inputs!"});
     }
+
+    var _email = email.toLowerCase();
+    verificationquestion.question =verificationquestion.question.replace(/\s+/g, '').toLowerCase();
+    verificationquestion.answer = verificationquestion.answer.replace(/\s+/g, '').toLowerCase();
    
     if(username.trim().length > 15){
       return res.status(400).json({message:'Username is too big!'});
@@ -58,7 +63,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
 
   const mailFormat:RegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   const passwordFormat:RegExp = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{7,15}$/;  
-  const isEmailValid = email.match(mailFormat);
+  const isEmailValid = _email.match(mailFormat);
   const isPasswordValid = password.match(passwordFormat);
 
   if(!isEmailValid){
@@ -68,7 +73,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     return res.status(400).json({message:'Password must include 7 to 15 characters which contain at least one numeric digit and a special character'})
   }
 
-    const oldUsermail: string | null = await User.findOne({ email });
+    const oldUsermail: string | null = await User.findOne({ email:_email });
     const oldUserusername: string | null = await User.findOne({ username });
 
     ///if username and email alreayd exists in db then sending appropriate feedback
@@ -82,7 +87,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     //grab all the data above and create new user
     const user: usertype = await User.create({
       username,
-      email: email.toLowerCase(),
+      email: _email.toLowerCase(),
       password: encryptedPassword,
       verificationquestion: verificationquestion,
     });
@@ -101,11 +106,12 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     await userprofile.save();
 
     const profilepic = userprofile.profilepic;
+    
 
     // console.log(UserProfile);
 
     //create token for session for user to stay without having to login again
-    token = jwt.sign({ user_id: user._id, email }, tokenkey, {
+    token = jwt.sign({ user_id: user._id, _email }, tokenkey, {
       expiresIn: "2d",
     });
     const decoded= jwt.verify(token, tokenkey) as {exp:number}
@@ -114,7 +120,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     //return created user
 
 
-    const userInfo = Object.assign({}, {username, email,profilepic});
+    const userInfo = Object.assign({}, {username, _email,profilepic});
 
     res.cookie("jwt", token, { httpOnly: true });
 
@@ -145,8 +151,8 @@ const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
       return res.status(400).json({message:"Please fill all empty inputs!"});
     }
 
-    const isUser: usertype | null = await User.findOne({ emailid });
-
+    const _email = emailid.toLowerCase();
+    const isUser: usertype | null = await User.findOne({ email:_email });
     if(!isUser){
       return res.status(401).json({message:'User does not exists! Please create account'})
     }
@@ -155,7 +161,6 @@ const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
 
     const profilepic = userprofile ?  userprofile.profilepic : '';
 
-
     const passwordValid = await bcrypt.compare(passwordid, isUser?.password);
 
     if(!passwordValid){
@@ -163,7 +168,7 @@ const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
     }
 
 
-      token = jwt.sign({ user_id: isUser._id, emailid }, tokenkey, {
+      token = jwt.sign({ user_id: isUser._id, _email }, tokenkey, {
         expiresIn: "2d",
       })
   
