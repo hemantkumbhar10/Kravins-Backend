@@ -1,10 +1,11 @@
 import {Request,Response, NextFunction } from 'express';
 const verifyToken = require('../auth/auth.middleware');
 import userprofilecontrollers from '../controllers/userprofile.controller';
+import { Application } from 'express';
 
 
 
-module.exports = function(app:any) {
+module.exports = function(app:Application) {
   app.use(function(req:Request, res:Response, next:NextFunction) {
     res.header(
       "Access-Control-Allow-Headers",
@@ -17,7 +18,7 @@ module.exports = function(app:any) {
     next();
   });
   app.get('/myprofile', verifyToken, userprofilecontrollers.getUserProfile);
-  app.put('/myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
+  app.patch('myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
   app.delete('/myprofile', verifyToken, userprofilecontrollers.deleteUserProfile);
 
 };

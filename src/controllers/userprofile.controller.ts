@@ -51,7 +51,7 @@ const updateUserProfile =async (req:Request,res:Response)=>{
 
     //if data is null, sending appropriate feedback
     if (!(username && email)) {
-      return res.status(400).send("Please fill out this input!");
+      return res.status(400).send("Please fill out this input!"); 
     }
 
   const mailFormat:RegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -65,8 +65,16 @@ const updateUserProfile =async (req:Request,res:Response)=>{
 
   const id = res.locals.user;
 
+  if(!id){
+    return res.status(401).json({message: "Please login first!"});
+  }
+
     //grab all the data above and create new user
     const user: {email:string, username:string} | any= await User.findByIdAndUpdate(id, {email:email,username:username}, {new:true});
+
+    if(!user){
+      return res.status(404).json({message:'User not found!'});
+    }
 
     const userid = {userid:id};
 
@@ -77,11 +85,11 @@ const updateUserProfile =async (req:Request,res:Response)=>{
     }
 
     const userprofile: userprofile | any = await UserProfile.findOneAndUpdate(userid,update_user_profile_data,{new:true});
-
     const userdata=[user,userprofile];
+
     return res.status(200).send(JSON.stringify(userdata));
   } catch (err) {
-    return res.status(500).send(err);
+    return res.status(500).json({message:"Something went wrong!"});
   }
 
 }
