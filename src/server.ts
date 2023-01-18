@@ -2,11 +2,11 @@ import express,{Request, Response, NextFunction} from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 dotenv.config();
+
 // import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 
 const verifyToken = require('./auth/auth.middleware');
-
 
 
 
@@ -26,7 +26,7 @@ app.use(cors({
     origin:clien_url,
     methods:["GET","POST","PUT","DELETE","PATCH"],
     credentials:true,
-    allowedHeaders:['X-Access-Token', 'Content-Type', 'Authorization']
+    allowedHeaders:['Content-Type' ]
 }));
 
 
@@ -42,11 +42,13 @@ app.get('/posts',verifyToken,(req,res)=>{
 require('./config/db');
 
 require('./routes/auth.routes')(app);
+require('./routes/csrf.route')(app);
 require('./routes/userprofile.routes')(app);
 require('./routes/posts/posts.route')(app);
 require('./routes/posts/likes.route')(app);
 require('./routes/posts/comments.routes')(app);
 require('./routes/groups/groups.routes')(app);
+
 
 
 
