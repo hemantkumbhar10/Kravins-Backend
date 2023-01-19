@@ -6,18 +6,6 @@ import User from "../models/Signup.schema";
 const tokenkey = process.env.TOKEN_KEY!;
 
 
-// function checkJWTExpiry(req: Request, res: Response, next: NextFunction) {
-//   const jwt = req.cookies.jwt;
-  
-//     // Verify the JWT and check the expiration time
-//     const decoded = jwt.verify(jwt, tokenkey)as {exp:number};
-//     if (decoded.exp < Date.now() / 1000) {
-//       // JWT has expired, return error
-//       return res.status(401).json({ error: 'Token expired' });
-//     }
-//     // JWT is valid, proceed to the next middleware
-//     next();
-// }
 
 
 const verifyToken = (req: Request, res: Response, next: NextFunction) => {

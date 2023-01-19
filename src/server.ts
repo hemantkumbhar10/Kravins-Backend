@@ -26,7 +26,7 @@ app.use(cors({
     origin:clien_url,
     methods:["GET","POST","PUT","DELETE","PATCH"],
     credentials:true,
-    allowedHeaders:['Content-Type' ]
+    allowedHeaders:['X-CSRF-Token','Content-Type', 'Authorization' ]
 }));
 
 
@@ -41,8 +41,8 @@ app.get('/posts',verifyToken,(req,res)=>{
 //connecting to database
 require('./config/db');
 
+// require('./routes/csrf.route')(app);
 require('./routes/auth.routes')(app);
-require('./routes/csrf.route')(app);
 require('./routes/userprofile.routes')(app);
 require('./routes/posts/posts.route')(app);
 require('./routes/posts/likes.route')(app);

@@ -16,6 +16,7 @@ interface usersignintype {
   _id?: any;
   email: string;
   password: string;
+  username:string;
   token?: string | null;
   verificationquestion?: string;
 }
@@ -31,10 +32,16 @@ const getUserProfile = async(req:Request, res:Response)=>{
     }
     const getuser:usersignintype | null = await User.findById(id);
     const userid = {userid:id};
-    const userprofile: userprofile | any = await UserProfile.findOne(userid);
+    const userprofile: userprofile | null = await UserProfile.findOne(userid);
+    const userInfo={
+      email:getuser?.email,
+      username:getuser?.username,
+      fullname:userprofile?.fullname,
+      birthdate:userprofile?.birthdate,
+      profilepic:userprofile?.profilepic,
 
-    const userdata=[getuser,userprofile];
-    return res.status(200).send(JSON.stringify(userdata));
+    }
+    return res.status(200).send(JSON.stringify(userInfo));
   }catch(err){
     return res.status(500).send(err);
   }
