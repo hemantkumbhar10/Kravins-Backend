@@ -1,10 +1,13 @@
-
+import {Express, Request, Response, NextFunction} from 'express';
 import csrf from 'csurf';
 
 
-const csrfProtection= csrf({cookie:{httpOnly:true,secure:true}})
 
-export {csrfProtection};
- 
-
-
+const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+    const csrfPro= csrf({ cookie: { httpOnly: true, secure: true } });
+    csrfPro(req, res, next);
+    res.locals._csrf = req.csrfToken();
+    return next();
+  };
+  
+  module.exports = csrfProtection;

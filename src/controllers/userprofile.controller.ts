@@ -50,6 +50,9 @@ const getUserProfile = async(req:Request, res:Response)=>{
 
 const updateUserProfile =async (req:Request,res:Response)=>{
   
+
+  const csrftoken = res.locals._csrf;
+  
   try {
     //fetching user data from body
     const { username, email, fullname, birthdate, profilepic } = req.body;

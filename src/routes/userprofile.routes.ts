@@ -2,7 +2,7 @@ import {Request,Response, NextFunction } from 'express';
 const verifyToken = require('../auth/auth.middleware');
 import userprofilecontrollers from '../controllers/userprofile.controller';
 import { Application } from 'express';
-import { csrfProtection } from '../auth/csrf.middleware';
+const csrfProtection = require('../auth/csrf.middleware');
 
 
 
@@ -19,7 +19,7 @@ module.exports = function(app:Application) {
     next();
   });
   app.get('/myprofile', verifyToken, csrfProtection, userprofilecontrollers.getUserProfile);
-  app.patch('myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
+  app.patch('/myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
   app.delete('/myprofile', verifyToken, userprofilecontrollers.deleteUserProfile);
 
 };
