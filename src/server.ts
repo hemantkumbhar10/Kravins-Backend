@@ -7,7 +7,7 @@ dotenv.config();
 import cookieParser from 'cookie-parser';
 
 const verifyToken = require('./auth/auth.middleware');
-
+import csurf from 'csurf';
 
 
 const app = express();
@@ -18,7 +18,8 @@ app.use(express.json());
 // app.use(bodyParser.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
-
+const csrf = csurf({cookie:{httpOnly:true, secure:true}});
+app.use(csrf);
 
 
 
@@ -41,7 +42,10 @@ app.get('/posts',verifyToken,(req,res)=>{
 //connecting to database
 require('./config/db');
 
-// require('./routes/csrf.route')(app);
+app.get('/csrf-token',(req:Request,res:Response)=>{
+        res.json({csrfToken:req.csrfToken()});
+});
+
 require('./routes/auth.routes')(app);
 require('./routes/userprofile.routes')(app);
 require('./routes/posts/posts.route')(app);

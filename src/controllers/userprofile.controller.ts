@@ -25,10 +25,10 @@ interface usersignintype {
 const getUserProfile = async(req:Request, res:Response)=>{
 
   try{
-
     const id = res.locals.user;
+
     if(!id){
-      res.status(401).send('Please Sign in to see your profile')
+      return res.status(401).send('Please Sign in to see your profile')
     }
     const getuser:usersignintype | null = await User.findById(id);
     const userid = {userid:id};
@@ -43,7 +43,7 @@ const getUserProfile = async(req:Request, res:Response)=>{
     }
     return res.status(200).send(JSON.stringify(userInfo));
   }catch(err){
-    return res.status(500).send(err);
+    return res.status(500).json({message:'oops! some error occured!'});
   }
 }
 

@@ -18,7 +18,7 @@ module.exports = function(app:Application) {
     );
     next();
   });
-  app.get('/myprofile', verifyToken, csrfProtection, userprofilecontrollers.getUserProfile);
+  app.get('/myprofile', verifyToken, userprofilecontrollers.getUserProfile);
   app.patch('/myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
   app.delete('/myprofile', verifyToken, userprofilecontrollers.deleteUserProfile);
 
