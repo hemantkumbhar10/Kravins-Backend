@@ -102,10 +102,13 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
       userid: user._id,
       fullname: "",
       profilepic: "",
+      birthdate: new Date("2000-01-01T18:30:00.000Z")
     });
     await userprofile.save();
 
     const profilepic = userprofile.profilepic;
+    const fullname = userprofile.fullname;
+    const birthdate = userprofile.birthdate;
     
 
     // console.log(UserProfile);
@@ -120,7 +123,7 @@ const signup = async (req: TypedRequestBody<usertype>, res: Response) => {
     //return created user
 
 
-    const userInfo = Object.assign({}, {username, _email,profilepic});
+    const userInfo = Object.assign({}, {username, email,profilepic,fullname,birthdate});
 
     res.cookie("jwt", token, { httpOnly: true });
 
@@ -160,6 +163,8 @@ const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
     const userprofile: userprofile | null = await UserProfile.findOne({ userid: isUser._id });
 
     const profilepic = userprofile ?  userprofile.profilepic : '';
+    const fullname = userprofile ?  userprofile.fullname : '';
+    const birthdate = userprofile ?  userprofile.birthdate : "2000-01-01T18:30:00.000Z";
 
     const passwordValid = await bcrypt.compare(passwordid, isUser?.password);
 
@@ -179,7 +184,7 @@ const signin = async (req: TypedRequestBody<usersignintype>, res: Response) => {
   
       const expiresAt = decoded.exp;
 
-      const userInfo = Object.assign({}, {username, email,profilepic});
+      const userInfo = Object.assign({}, {username, email,profilepic,fullname,birthdate});
 
 
       res.cookie("jwt", token, {httpOnly:true});

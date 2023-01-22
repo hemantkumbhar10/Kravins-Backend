@@ -51,7 +51,6 @@ const getUserProfile = async(req:Request, res:Response)=>{
 const updateUserProfile =async (req:Request,res:Response)=>{
   
 
-  const csrftoken = res.locals._csrf;
   
   try {
     //fetching user data from body
@@ -95,8 +94,21 @@ const updateUserProfile =async (req:Request,res:Response)=>{
     }
 
     const userprofile: userprofile | any = await UserProfile.findOneAndUpdate(userid,update_user_profile_data,{new:true});
-    const userdata=[user,userprofile];
 
+    if(!userprofile){
+      return res.status(404).json({message:"User profile does not exists!"})
+    }
+    // const userdata=[user,userprofile];
+    // console.log(userdata)
+    const userdata={
+      username:user.username,
+      email:user.email,
+      fullname:userprofile.fullname,
+      profilepic:userprofile.profilepic,
+      birthdate:userprofile.birthdate
+
+    };
+    console.log(userdata)
     return res.status(200).send(JSON.stringify(userdata));
   } catch (err) {
     return res.status(500).json({message:"Something went wrong!"});
