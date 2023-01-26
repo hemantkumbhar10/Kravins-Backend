@@ -2,6 +2,7 @@ import express,{Request, Response, NextFunction} from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 dotenv.config();
+import multer from "multer";
 
 // import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -20,6 +21,7 @@ app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const csrf = csurf({cookie:{httpOnly:true, secure:true}});
 app.use(csrf);
+
 
 
 
