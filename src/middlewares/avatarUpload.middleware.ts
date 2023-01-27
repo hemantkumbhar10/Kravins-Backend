@@ -54,7 +54,7 @@ const avtarUploader = async(req:Request, res:Response)=>{
     blobService.uploadStream(stream, streamLength)
     .then(
         ()=>{
-            return res.status(200).json({message:'File uploaded to Azure Blob storage.'});
+            return res.status(200).send(`${url}?${Date.now()}`);
         }
     ).catch(
         (err)=>{

@@ -41,6 +41,7 @@ const getUserProfile = async(req:Request, res:Response)=>{
       profilepic:userprofile?.profilepic,
 
     }
+    console.log('This is from get profile route..',userInfo)
     return res.status(200).send(JSON.stringify(userInfo));
   }catch(err){
     return res.status(500).json({message:'oops! some error occured!'});
@@ -54,7 +55,7 @@ const updateUserProfile =async (req:Request,res:Response)=>{
   
   try {
     //fetching user data from body
-    const { username, email, fullname, birthdate, profilepic } = req.body;
+    const { username, email, fullname, birthdate } = req.body;
 
     // console.log(new Date(birthdate).toISOString());
 
@@ -90,7 +91,6 @@ const updateUserProfile =async (req:Request,res:Response)=>{
     const update_user_profile_data = {
       fullname: fullname,
       birthdate: new Date(birthdate).toISOString(),
-      profilepic: profilepic
     }
 
     const userprofile: userprofile | any = await UserProfile.findOneAndUpdate(userid,update_user_profile_data,{new:true});
@@ -108,7 +108,7 @@ const updateUserProfile =async (req:Request,res:Response)=>{
       birthdate:userprofile.birthdate
 
     };
-    console.log(userdata)
+    console.log('This is from update profile route..',userdata)
     return res.status(200).send(JSON.stringify(userdata));
   } catch (err) {
     return res.status(500).json({message:"Something went wrong!"});
