@@ -11,8 +11,10 @@ interface TypedPostsBody<T> extends Request {
 }
 
 interface posts {
-  description: string;
-  image: string[];
+  title:string,
+  brief:string,
+  description?: string;
+  image: string;
   comments: Number;
   shares: Number;
   groupid?:mongoose.Schema.Types.ObjectId,
@@ -20,24 +22,28 @@ interface posts {
 
 interface updatepost {
   postid: mongoose.Schema.Types.ObjectId;
-  description: string;
-  image: string[];
+  title?:string,
+  brief?:string,
+  description?: string;
+  image?: string;
 }
 
 
 const createPost = async (req: TypedPostsBody<posts>, res: Response) => {
   try {
-    const { description, image, comments, shares, groupid} = req.body;
+    const {title, brief, description, image, comments, shares, groupid} = req.body;
 
     const userid = res.locals.user;
 
-    if (!description) {
+    if (!title) {
       return res
         .status(400)
         .send("Empty post is like empty stomach, hurts to see one!");
     }
 
     const post = await Post.create({
+      title:title,
+      brief:brief,
       description: description,
       image: image,
       comments: comments,

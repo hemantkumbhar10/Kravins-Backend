@@ -3,21 +3,30 @@ import mongoose from "mongoose";
 
 interface posts{
     userid:mongoose.Schema.Types.ObjectId,
-    description:string,
-    image:string[],
+    title:string,
+    brief:string,
+    recipe?:string,
+    image:string,
     comments:Number,
     shares:Number,
 }
 
 
 const postSchema = new mongoose.Schema<posts>({
-    description:{
+    title:{
         type:String,
-        required:true,
-        maxlength:250,
+        required:true
+    },
+    brief:{
+        type:String,
+        required:false
+    },
+    recipe:{
+        type:String,
+        required:false,
     },
     image:{
-        type:[String],
+        type:String,
     },
     comments:{
         type:Number,
