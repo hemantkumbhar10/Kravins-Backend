@@ -25,71 +25,73 @@ interface updatepost {
   title?:string,
   brief?:string,
   description?: string;
-  image?: string;
+  image?: File | string;
 }
 
 
 const createPost = async (req: TypedPostsBody<posts>, res: Response) => {
-  try {
+  // try {
     const {title, brief, description, image, comments, shares, groupid} = req.body;
 
     const userid = res.locals.user;
 
-    if (!title) {
-      return res
-        .status(400)
-        .send("Empty post is like empty stomach, hurts to see one!");
-    }
+    // if (!title) {
+    //   return res
+    //     .status(400)
+    //     .send("Empty post is like empty stomach, hurts to see one!");
+    // }
 
-    const post = await Post.create({
-      title:title,
-      brief:brief,
-      description: description,
-      image: image,
-      comments: comments,
-      shares: shares,
-    });
+    console.log(image);
 
-    const likes = await Likes.create({
-      postid:post._id});
+  //   const post = await Post.create({
+  //     title:title,
+  //     brief:brief,
+  //     description: description,
+  //     image: image,
+  //     comments: comments,
+  //     shares: shares,
+  //   });
 
-    const id = { userid: userid };
+  //   const likes = await Likes.create({
+  //     postid:post._id});
 
-    const isPostexists = await UserPost.findOne(id);
+  //   const id = { userid: userid };
 
-    // console.log(isPostexists);
+  //   const isPostexists = await UserPost.findOne(id);
 
-    let userpost;
+  //   // console.log(isPostexists);
 
-    if (isPostexists === null) {
-      userpost = await UserPost.create({
-        userid: userid,
-        postid: post._id,
-      });
-    } else {
-      const id = isPostexists._id;
-      userpost = await UserPost.findByIdAndUpdate(
-        id,
-        {
-          $push: { postid: post._id },
-        },
-        { new: true }
-      );
-    }
+  //   let userpost;
 
-    if(groupid){
-      const group_post = await Grouppost.create({
-        groupid:groupid,
-        postid:post._id
-      })
-    }
+  //   if (isPostexists === null) {
+  //     userpost = await UserPost.create({
+  //       userid: userid,
+  //       postid: post._id,
+  //     });
+  //   } else {
+  //     const id = isPostexists._id;
+  //     userpost = await UserPost.findByIdAndUpdate(
+  //       id,
+  //       {
+  //         $push: { postid: post._id },
+  //       },
+  //       { new: true }
+  //     );
+  //   }
 
-    const userdata = [userpost, post];
+  //   if(groupid){
+  //     const group_post = await Grouppost.create({
+  //       groupid:groupid,
+  //       postid:post._id
+  //     })
+  //   }
 
-    return res.status(200).send(userdata);
-  } catch (error) {
-    return res.status(500).send(error);
-  }
+  //   const userdata = [userpost, post];
+
+  //   return res.status(200).send(userdata);
+  // } catch (error) {
+  //   return res.status(500).send(error);
+  // }
 };
 
 const getUsersAllPosts = async (req: Request, res: Response) => {

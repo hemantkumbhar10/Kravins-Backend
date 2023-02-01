@@ -2,8 +2,7 @@ import {Request,Response, NextFunction } from 'express';
 const verifyToken = require('../auth/auth.middleware');
 import userprofilecontrollers from '../controllers/userprofile.controller';
 import { Application } from 'express';
-import { avtarUploader } from '../middlewares/avatarUpload.middleware';
-const csrfProtection = require('../auth/csrf.middleware');
+import { uploadAvatar } from '../controllers/avatar.controller';
 
 
 
@@ -20,7 +19,7 @@ module.exports = function(app:Application) {
     next();
   });
   app.get('/myprofile', verifyToken, userprofilecontrollers.getUserProfile);
-  app.post('/uploadavatar',verifyToken,avtarUploader )
+  app.post('/uploadavatar',verifyToken,uploadAvatar )
   app.patch('/myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
   app.delete('/myprofile', verifyToken, userprofilecontrollers.deleteUserProfile);
 
