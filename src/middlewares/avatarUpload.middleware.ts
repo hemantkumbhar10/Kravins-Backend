@@ -46,7 +46,8 @@ const avtarUploader = async(req:Request, res:Response)=>{
     }
     const url = blobService.url;
     const id = {userid:userid}
-    const userprofile: userprofile | any = await UserProfile.findOneAndUpdate(id,{profilepic:url},{new:true});
+    const urlNow = `${url}?${Date.now()}`
+    const userprofile: userprofile | any = await UserProfile.findOneAndUpdate(id,{profilepic:urlNow},{new:true});
     console.log(userprofile);
     const stream = intoStream(binaryBuffer)
     const streamLength = binaryBuffer.length;
