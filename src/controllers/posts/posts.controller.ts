@@ -5,6 +5,8 @@ import UserPost from "../../models/posts/UserPosts.schema";
 import Likes from "../../models/posts/Likes.schema";
 import Comments from "../../models/posts/Comments.schema";
 import Grouppost from "../../models/groups/Groupposts.schema";
+import multer from "multer";
+
 
 interface TypedPostsBody<T> extends Request {
   body: T;
@@ -29,19 +31,25 @@ interface updatepost {
 }
 
 
-const createPost = async (req: TypedPostsBody<posts>, res: Response) => {
+const createPost = async (req: Request, res: Response) => {
   // try {
     const {title, brief, description, image, comments, shares, groupid} = req.body;
-
+    const inMemoryStorage = multer.memoryStorage();
+    const uploadStrategy = multer({ storage: inMemoryStorage }).single('image')(req,res, async(err)=>{
+    console.log(req.body);
+    console.log(req.file);
+    
+    return res.status(200).send('successful')
+    
     const userid = res.locals.user;
-
+    })
     // if (!title) {
     //   return res
     //     .status(400)
     //     .send("Empty post is like empty stomach, hurts to see one!");
     // }
 
-    console.log(image);
+    // console.log(image);
 
   //   const post = await Post.create({
   //     title:title,
