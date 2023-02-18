@@ -10,9 +10,11 @@ interface UploaderArgs {
   containerName: string;
   userId: string;
   postId?: string;
+  groupname?:string;
   isAvatar?:boolean;
   isPersonalPost?:boolean;
   isGroupPosts?:boolean;
+  isGroupAvatar?:boolean;
 }
 
 
@@ -26,6 +28,10 @@ const getBlobName = (originalName: any, userId: string) => {
 
 const getPerSonalPostBlobName = (originalName:any, userId:string, postid:string)=>{
   return `${userId}-${postid}-${originalName}`;
+};
+
+const getgroupAvatarBlobName = (originalName:any, userId:string)=>{
+  return `${userId}-groupAvatar-${originalName}`;
 };
 
 
@@ -61,6 +67,8 @@ const azureUploader = async (
           );
         }else if(uploaderArgs.isPersonalPost){
           blobName = getPerSonalPostBlobName(req.file?.originalname, uploaderArgs.userId, uploaderArgs.postId!)
+        }else if(uploaderArgs.isGroupAvatar){
+          blobName = getgroupAvatarBlobName(req.file?.originalname, uploaderArgs.userId)
         }else{
           reject('Not Identified!');
           return;

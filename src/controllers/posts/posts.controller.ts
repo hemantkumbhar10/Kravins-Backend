@@ -45,11 +45,8 @@ const userpost_container_name = process.env.AZURE_USER_POSTS_CONTAINER_NAME!;
 
 const createPost = async (req: Request, res: Response) => {
   // try {
-    const {title, brief, description, image, comments, shares, groupid} = req.body;
     const inMemoryStorage = multer.memoryStorage();
     const uploadStrategy = multer({ storage: inMemoryStorage }).single('image')(req,res, async(err)=>{
-    console.log(req.body);
-    console.log(req.file);
     const userid = res.locals.user;
 
     if (!req.body.title) {

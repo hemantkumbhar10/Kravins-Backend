@@ -1,8 +1,10 @@
-import {Request, Response} from 'express';
+import {Request, Response, NextFunction} from 'express';
 import mongoose from 'mongoose';
-
 import Groups from "../../models/groups/Groups.schema";
 import User from '../../models/Signup.schema';
+import multer from 'multer';
+import { azureUploader } from '../../middlewares/azure.middleware';
+
 
 
 
@@ -20,34 +22,53 @@ interface group{
     groupid?:mongoose.Schema.Types.ObjectId
 }
 
-
+const containerName = process.env.AZURE_USER_GROUP_AVATARS_CONTAINER_NAME!;
 
 const createGroup = async(req:TypedRequestBody<group>, res:Response)=>{
-    try {
 
-        const {groupname, groupimage, groupbio} = req.body;
+    const inMemoryStorage = multer.memoryStorage();
+    
+    multer({storage:inMemoryStorage}).single('image')(req,res, async(err)=>{
 
-        if(!(groupname || groupimage || groupbio)){
+        const {groupname, groupbio} = req.body;
+
+        if(!(groupname || req.file || groupbio)){
             return res.status(400).send('Bad input, all fields are required!');
+        };
+
+        console.log(groupname);
+        console.log(groupbio);
+
+            const userid = res.locals.user;
+            const user = await User.findById(userid);
+    
+            const username = user?.username;
+    
+            const newGroup = await Groups.create({
+                groupname:groupname,
+                groupimage:'dummyimage',
+                groupbio:groupbio,
+                groupowner:username,
+                ownerid:userid
+            })
+
+        try {
+            const imageUrl = await azureUploader(req,res,{
+                containerName:containerName, 
+                userId:userid, isGroupAvatar:true, 
+                groupname:groupname});
+
+            const group = await newGroup.updateOne({
+                groupimage: imageUrl,
+            })
+            return res.status(200).send('SUCESSFULL');        
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({message:'Something went wrong!'});
         }
 
-        const userid = res.locals.user;
-        const user = await User.findById(userid);
-
-        const username = user?.username;
-
-        const created_group = await Groups.create({
-            groupname:groupname,
-            groupimage:groupimage,
-            groupbio:groupbio,
-            groupowner:username,
-            ownerid:userid
-        })
-
-        return res.status(200).send(created_group);        
-    } catch (error) {
-        return res.status(500).send(error);
-    }
+    })
+   
 } 
 
 
