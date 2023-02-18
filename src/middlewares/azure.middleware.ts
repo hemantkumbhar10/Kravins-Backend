@@ -15,22 +15,37 @@ interface UploaderArgs {
   isGroupPosts?:boolean;
 }
 
+
+
 const getBlobName = (originalName: any, userId: string) => {
   return `${userId}-${originalName}`;
 };
+
+
+
 
 const getPerSonalPostBlobName = (originalName:any, userId:string, postid:string)=>{
   return `${userId}-${postid}-${originalName}`;
 };
 
+
+
 const azureUploader = async (
+
   req: Request,
   res: Response,
   uploaderArgs: UploaderArgs
+
+
 ) => {
-  return new Promise(async (resolve, reject) => {
+
+  return new Promise(
+    async (resolve, reject) => {
+
+
     const inMemoryStorage = multer.memoryStorage();
     const uploadStrategy = multer({ storage: inMemoryStorage }).single("image")(
+
       req,
       res,
       async (err) => {
@@ -56,6 +71,7 @@ const azureUploader = async (
           uploaderArgs.containerName,
           blobName
         );
+        
         const blobExists = await blobService.exists();
 
         if (blobExists) {

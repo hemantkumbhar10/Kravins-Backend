@@ -19,8 +19,10 @@ app.use(express.json());
 // app.use(bodyParser.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
-const csrf = csurf({cookie:{httpOnly:true, secure:true}});
-app.use(csrf);
+
+const csrf = csurf({cookie:{key:'XSRF-TOKEN'}});
+
+// app.use(csrf);
 
 
 
@@ -44,8 +46,22 @@ app.get('/posts',verifyToken,(req,res)=>{
 //connecting to database
 require('./config/db');
 
-app.get('/csrf-token',(req:Request,res:Response)=>{
-        res.json({csrfToken:req.csrfToken()});
+app.get('/csrf-token',csrf,(req:Request,res:Response,next:NextFunction)=>{
+    // res.setHeader('Cache-Control', 'no-cache');
+    // csrf(req,res,next);
+    // req.csrfToken();
+    // const token = req.csrfToken()
+    //     console.log('csrf token is here',token);
+    //     return res.json({csrfToken:token});
+        // return res.json({csrfToken:'ok'});
+        // res.setHeader('Cache-Control', 'no-cache');
+        const newToken = req.csrfToken();
+        res.cookie('XSRF-TOKEN', newToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+        });
+        res.json({ csrfToken: newToken });
 });
 
 require('./routes/auth.routes')(app);

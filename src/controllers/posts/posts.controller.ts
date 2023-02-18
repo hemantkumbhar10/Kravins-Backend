@@ -6,10 +6,20 @@ import Likes from "../../models/posts/Likes.schema";
 import Comments from "../../models/posts/Comments.schema";
 import Grouppost from "../../models/groups/Groupposts.schema";
 import multer from "multer";
+import { azureUploader } from "../../middlewares/azure.middleware";
 
 
 interface TypedPostsBody<T> extends Request {
   body: T;
+}
+
+interface UploaderArgs {
+  containerName: string;
+  userId: string;
+  postId?: string;
+  isAvatar?:boolean;
+  isPersonalPost?:boolean;
+  isGroupPosts?:boolean;
 }
 
 interface posts {
@@ -30,6 +40,8 @@ interface updatepost {
   image?: File | string;
 }
 
+const userpost_container_name = process.env.AZURE_USER_POSTS_CONTAINER_NAME!;
+
 
 const createPost = async (req: Request, res: Response) => {
   // try {
@@ -38,32 +50,66 @@ const createPost = async (req: Request, res: Response) => {
     const uploadStrategy = multer({ storage: inMemoryStorage }).single('image')(req,res, async(err)=>{
     console.log(req.body);
     console.log(req.file);
-    
-    return res.status(200).send('successful')
-    
     const userid = res.locals.user;
-    })
-    // if (!title) {
-    //   return res
-    //     .status(400)
-    //     .send("Empty post is like empty stomach, hurts to see one!");
-    // }
 
+    if (!req.body.title) {
+      return res
+        .status(400)
+        .send("Empty post is like empty stomach, hurts to see one!");
+    }
+
+    const newPost = await Post.create({
+      title:req.body.title,
+      brief:req.body.brief,
+      recipe: req.body.description,
+      image:'',
+      comments: '',
+      shares: '',
+    });
+
+    try{
+    const imageUrl = await azureUploader(req, res, {
+      containerName: userpost_container_name,
+      userId: userid,
+      isPersonalPost: true,
+    });
+    const post = await newPost.updateOne({
+      image:imageUrl,
+    });
+    const userpost = await UserPost.create({
+      userid: userid,
+      postid: newPost._id,
+    });
+
+    console.log(post);
+    console.log('user info for post-------------->', userpost)
+
+    const likes = await Likes.create({
+      postid:newPost._id});
+
+      return res.status(200).send('successful')
+  }catch(e){
+    await newPost.delete();
+    console.log(e);
+    return res.status(500).json({message:'something went wrong!'})
+  }
+
+    
+
+    
+
+    
+    
+
+
+    
+    
+    
+    })
+    
     // console.log(image);
 
-  //   const post = await Post.create({
-  //     title:title,
-  //     brief:brief,
-  //     description: description,
-  //     image: image,
-  //     comments: comments,
-  //     shares: shares,
-  //   });
-
-  //   const likes = await Likes.create({
-  //     postid:post._id});
-
-  //   const id = { userid: userid };
+    
 
   //   const isPostexists = await UserPost.findOne(id);
 
