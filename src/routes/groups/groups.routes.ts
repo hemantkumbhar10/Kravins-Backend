@@ -20,7 +20,7 @@ module.exports = function(app:any) {
     });
     app.post('/mygroup', verifyToken, groupsController.createGroup);
     app.put('/mygroup', verifyToken, groupsController.updateGroup);
-    app.get('/groups', groupsController.getAllGroups);
+    app.get('/groups',verifyToken, groupsController.getAllGroups);
     app.get('/group', groupsController.getGroupById);
     app.delete('/deletegroup',verifyToken, groupsController.deleteGroup);
   

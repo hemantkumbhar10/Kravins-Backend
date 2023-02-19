@@ -41,7 +41,7 @@ const getUserProfile = async(req:Request, res:Response)=>{
       profilepic:userprofile?.profilepic,
 
     }
-    console.log('This is from get profile route..',userInfo)
+    // console.log('This is from get profile route..',userInfo)
     return res.status(200).send(JSON.stringify(userInfo));
   }catch(err){
     return res.status(500).json({message:'oops! some error occured!'});

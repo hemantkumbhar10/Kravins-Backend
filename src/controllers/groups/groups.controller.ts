@@ -8,7 +8,7 @@ import { azureUploader } from '../../middlewares/azure.middleware';
 
 
 
-interface TypedRequestBody<T> extends Request{
+interface TypedRequestBody<T> extends Request{  
     body:T
 }
 
@@ -123,11 +123,10 @@ const getAllGroups = async(req:Request,res:Response)=>{
 }
 
 
-const getGroupById = async(req:TypedRequestBody<{groupid:mongoose.Schema.Types.ObjectId}>, res:Response)=>{
+const getGroupById = async(req:TypedRequestBody<any>, res:Response)=>{
     try {
 
-        const {groupid} = req.body;
-
+        const groupid = req.query.id;
         const get_one_group = await Groups.findById(groupid);
         if(!get_one_group){
             return res.status(404).send('No group with this id');
@@ -138,7 +137,7 @@ const getGroupById = async(req:TypedRequestBody<{groupid:mongoose.Schema.Types.O
     }
 }
 
-const deleteGroup = async(req:TypedRequestBody<{groupid:mongoose.Schema.Types.ObjectId}>, res:Response)=>{
+const deleteGroup = async(req:TypedRequestBody<{groupid:string}>, res:Response)=>{
     try {
 
         const {groupid} = req.body;
