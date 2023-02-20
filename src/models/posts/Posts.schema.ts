@@ -1,18 +1,27 @@
 import mongoose from "mongoose";
+import Groups from "../groups/Groups.schema";
+import UserProfile from "../Userprofile.schema";
+import User from "../Signup.schema";
 
 
 interface posts{
-    userid:mongoose.Schema.Types.ObjectId,
-    title:string,
-    brief:string,
-    recipe?:string,
-    image:string,
-    comments:Number,
-    shares:Number,
+    user_profile:mongoose.Schema.Types.ObjectId |string| typeof User;
+    title:string;
+    brief:string;
+    recipe?:string;
+    image:string;
+    comments:Number;
+    shares:Number;
+    groupid?:mongoose.Schema.Types.ObjectId |string| typeof Groups;
 }
 
 
 const postSchema = new mongoose.Schema<posts>({
+    user_profile:{
+        type: String,
+        ref:'userprofile',
+        required:false,
+    },
     title:{
         type:String,
         required:true
@@ -35,8 +44,13 @@ const postSchema = new mongoose.Schema<posts>({
     shares:{
         type:Number,
         default:0
+    },
+    groupid:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:Groups,
+        required:false,
     }
-});
+},{timestamps:true});
 
 
 const Post = mongoose.model('post', postSchema);

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
 import Post from "../../models/posts/Posts.schema";
 import UserPost from "../../models/posts/UserPosts.schema";
 import Likes from "../../models/posts/Likes.schema";
@@ -7,6 +7,7 @@ import Comments from "../../models/posts/Comments.schema";
 import Grouppost from "../../models/groups/Groupposts.schema";
 import multer from "multer";
 import { azureUploader } from "../../middlewares/azure.middleware";
+import UserProfile from "../../models/Userprofile.schema";
 
 
 interface TypedPostsBody<T> extends Request {
@@ -29,7 +30,7 @@ interface posts {
   image: string;
   comments: Number;
   shares: Number;
-  groupid?:mongoose.Schema.Types.ObjectId,
+  groupid?:string,
 }
 
 interface updatepost {
@@ -49,20 +50,44 @@ const createPost = async (req: Request, res: Response) => {
     const uploadStrategy = multer({ storage: inMemoryStorage }).single('image')(req,res, async(err)=>{
     const userid = res.locals.user;
 
+    let userprofile =  await UserProfile.findOne({userid:userid});
+
+    let userprofileid = userprofile?.id;
+    
+
+
     if (!req.body.title) {
       return res
         .status(400)
         .send("Empty post is like empty stomach, hurts to see one!");
     }
 
-    const newPost = await Post.create({
-      title:req.body.title,
-      brief:req.body.brief,
-      recipe: req.body.description,
-      image:'',
-      comments: '',
-      shares: '',
-    });
+    let newPost;
+    // console.log('groupid ------------>',req.body.groupid);
+
+    if(!req.body.groupid){
+      console.log('id in create mode ------------>',userprofileid);
+      newPost = await Post.create({
+        user_profile:userprofileid,
+        title:req.body.title,
+        brief:req.body.brief,
+        recipe: req.body.description,
+        image:'',
+        comments: '',
+        shares: '',
+      });
+    }else{
+      newPost = await Post.create({
+        user_profile:userprofileid,
+        title:req.body.title,
+        brief:req.body.brief,
+        recipe: req.body.description,
+        image:'',
+        comments: '',
+        shares: '',
+        groupid:req.body.groupid,
+      });
+    }
 
     try{
     const imageUrl = await azureUploader(req, res, {
@@ -73,13 +98,25 @@ const createPost = async (req: Request, res: Response) => {
     const post = await newPost.updateOne({
       image:imageUrl,
     });
-    const userpost = await UserPost.create({
-      userid: userid,
-      postid: newPost._id,
-    });
+
+
+    let UsersPosts;
+
+    if(req.body.groupid){
+      UsersPosts = await Grouppost.create({
+        groupid:req.body.groupid,
+        postid:post._id
+        })
+     }else{
+     UsersPosts = await UserPost.create({
+        userid: userid,
+        postid: newPost._id,
+      });
+     }
+    
 
     console.log(post);
-    console.log('user info for post-------------->', userpost)
+    console.log('user info for post-------------->', UsersPosts)
 
     const likes = await Likes.create({
       postid:newPost._id});
@@ -206,6 +243,19 @@ const updateUserPost = async (
   }
 }
 
+const pagination = async(req:Request, res:Response)=>{
+  const page:any = req.query.page || 1;
+  const per_page = 10;
+
+  try{
+  const posts = await Post.find().populate({path:'user_profile', select:'fullname profilepic'}).sort({createdAt:-1}).skip((page-1) * per_page).limit(per_page);
+  console.log(posts);
+  return res.status(200).json(posts);}catch(e){
+    console.log('Error in pagination----->',e);
+    return res.status(500).json({message:'Some error occured'})
+  }
+}
+
 
 const deletePost = async(req:TypedPostsBody<{postid:mongoose.Schema.Types.ObjectId}>, res:Response)=>{
 
@@ -234,7 +284,7 @@ const deletePost = async(req:TypedPostsBody<{postid:mongoose.Schema.Types.Object
 
     return res.status(200).send("Post successfully deleted");
 
-  } catch (error) {
+  } catch (error) {``
     return res.status(500).send(error);
   }
 
@@ -254,4 +304,4 @@ const dummyPost = async(req:TypedPostsBody<{postid:mongoose.Schema.Types.ObjectI
 
 
 
-export default { createPost, getUsersAllPosts,updateUserPost,deletePost,dummyPost};
+export default { createPost, getUsersAllPosts,updateUserPost,deletePost,dummyPost, pagination};
