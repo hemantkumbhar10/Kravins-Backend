@@ -37,7 +37,7 @@ interface updatepost {
   postid: mongoose.Schema.Types.ObjectId;
   title?:string,
   brief?:string,
-  description?: string;
+  recipe?: string;
   image?: File | string;
 }
 
@@ -193,6 +193,7 @@ const getUsersAllPosts = async (req: Request, res: Response) => {
       return res.status(404).send("No posts found!");
     }
 
+
     const postids = user.postid;
 
     const posts = await Post.find({ _id: { $in: postids } });
@@ -209,36 +210,34 @@ const updateUserPost = async (
   req: TypedPostsBody<updatepost>,
   res: Response
 ) => {
+
+  const { postid, title, brief, recipe,} = req.body;
+
+  if(!title){
+    return res.status(500).json({message:"Title cannot be empty"});
+  }
+
   try {
-    const { postid, description, image } = req.body;
-
     const userid = res.locals.user;
-
-    const id = { userid: userid };
-
-    const userPosts = await UserPost.findOne(id);
-
-    const postids = userPosts?.postid;
-
-    const isUserValidToUpdatePost = postids?.includes(postid);
-
-    if (!isUserValidToUpdatePost) {
-      return res.status(401).send("You can't make changes to this post");
-    }
-
     const updatedpost = await Post.findByIdAndUpdate<posts>(
-      postid,
-      {
-        description: description,
-        image: image,
-      },
+      {_id:postid,user_profile: userid},
+      {$set:{
+        title:title,
+        brief:brief,
+        recipe:recipe,
+        
+      }},
       { new: true }
     );
 
+    if(!updatedpost){
+      return res.status(401).send("You can't make changes to this post");
+    }
     // console.log(updatedpost);
 
     return res.status(200).send(updatedpost);
   } catch (error) {
+    console.log(error)
     return res.status(500).send(error);
   }
 }
