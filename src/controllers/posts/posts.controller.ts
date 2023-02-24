@@ -245,11 +245,11 @@ const updateUserPost = async (
 
 const pagination = async(req:Request, res:Response)=>{
   const page:any = req.query.page || 1;
-  const per_page = 10;
+  const per_page = 5;
 
   try{
   const posts = await Post.find().populate({path:'user_profile groupid', select:'fullname profilepic groupname groupimage groupowner'}).sort({createdAt:-1}).skip((page-1) * per_page).limit(per_page);
-  console.log(posts);
+  console.log(page);
   return res.status(200).json(posts);}catch(e){
     console.log('Error in pagination----->',e);
     return res.status(500).json({message:'Some error occured'})
