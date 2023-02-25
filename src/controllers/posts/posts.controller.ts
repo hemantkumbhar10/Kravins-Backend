@@ -8,6 +8,7 @@ import Grouppost from "../../models/groups/Groupposts.schema";
 import multer from "multer";
 import { azureUploader } from "../../middlewares/azure.middleware";
 import UserProfile from "../../models/Userprofile.schema";
+import { BlobServiceClient } from "@azure/storage-blob";
 
 
 interface TypedPostsBody<T> extends Request {
@@ -42,6 +43,7 @@ interface updatepost {
 }
 
 const userpost_container_name = process.env.AZURE_USER_POSTS_CONTAINER_NAME!;
+const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING!
 
 
 const createPost = async (req: Request, res: Response) => {
@@ -260,30 +262,39 @@ const deletePost = async(req:TypedPostsBody<{postid:mongoose.Schema.Types.Object
 
   try {
     
-    const {postid} = req.body;
+    const {postid} = req.query;
     const userid = res.locals.user;
+    if(!postid){
+      return res.status(500).json({message:'Something wrong happened!'})
+    }
 
-    const id = { userid: userid };
 
-    const userPosts = await UserPost.findOne(id);
+    const deletedPost = await Post.findByIdAndDelete(
+      {_id:postid, user_profile:userid},);
 
-    const postids = userPosts?.postid;
 
-    const isUserValidToUpdatePost = postids?.includes(postid);
+    const imageUrl = deletedPost?.image;
+    const path = new URL(imageUrl!).pathname;
+    const [containerName, ...blobNameSegments] = path.split('/').filter(segment => segment !== '');
+    const blobName = blobNameSegments.join('/');
+    const blobname = decodeURIComponent(blobName);
 
-    if (!isUserValidToUpdatePost) {
+   const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+    const containerClient = blobServiceClient.getContainerClient(userpost_container_name);
+   const blobClient = containerClient.getBlobClient(blobname);
+
+   await blobClient.delete();
+    if (!deletedPost) {
       return res.status(401).send("You can't make changes to this post");
     }
 
-    const deletedPost = await Post.findByIdAndDelete(postid);
-    const deletedDocUserPosts =  await UserPost.findOneAndUpdate(id, {$pull:{postid:postid}}, {new:true});
-    const cid = {postid:postid};
-    const deleted_comments_for_this_post = await Comments.deleteMany(cid);
-    const deleted_likes_for_this_post = await Likes.findOneAndDelete(cid);
+    // const deleted_comments_for_this_post = await Comments.deleteMany(cid);
+    // const deleted_likes_for_this_post = await Likes.findOneAndDelete(cid);
 
     return res.status(200).send("Post successfully deleted");
 
-  } catch (error) {``
+  } catch (error) {
+    console.log(error);
     return res.status(500).send(error);
   }
 
