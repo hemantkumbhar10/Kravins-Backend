@@ -11,7 +11,7 @@ module.exports = function(app:Application) {
     res.header(
       "Access-Control-Allow-Headers",
       "x-access-token, Origin, Content-Type, Accept"
-    );
+    ); 
     res.header(
       "Content-Type",
       "application/json"
@@ -23,5 +23,5 @@ module.exports = function(app:Application) {
   app.patch('/myprofile', verifyToken, userprofilecontrollers.updateUserProfile);
   app.delete('/myprofile', verifyToken, userprofilecontrollers.deleteUserProfile);
 
-};
+}; 
 
